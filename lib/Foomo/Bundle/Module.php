@@ -36,7 +36,7 @@ class Module extends \Foomo\Modules\ModuleBase
 	 *
 	 */
 	const NAME = 'Foomo.Bundle';
-	const VERSION = '0.1.2';
+	const VERSION = '0.1.3';
 
 	//---------------------------------------------------------------------------------------------
 	// ~ Overriden static methods

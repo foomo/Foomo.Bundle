@@ -139,7 +139,15 @@ abstract class AbstractBundle
 			$ret .= '-dependecy-' . $dependency->type . '-' . $dependency->bundle->getFingerPrint();
 		}
 		return $ret;
-	}
+    }
+
+    /**
+     * like a fingerprint, but without deps - needed for compilation caching
+     */
+    public function getHash()
+    {
+        return get_called_class() . '-' . $this->name . ($this->debug?'-debug-':'');
+    }
 
 	/**
 	 * @param AbstractBundle[] $bundles
@@ -178,4 +186,5 @@ abstract class AbstractBundle
 	 * @return bool
 	 */
 	abstract public static function canMerge($mimeType);
+
 }

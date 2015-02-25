@@ -142,9 +142,11 @@ class Compiler
 	public static function compile(AbstractBundle $bundle)
 	{
 		static $cache = array();
+        static $depsCache = [];
 		$cacheKey = md5($bundle->getFingerPrint());
 		if(!isset($cache[$cacheKey])) {
 			Timer::start(__METHOD__);
+
 
 			foreach($bundle->references as $reference) {
 				$result = new Compiler\Result;
@@ -159,17 +161,22 @@ class Compiler
 				Compiler\Result\Resource::MIME_TYPE_JS => null
 			);
 			$mergersFound = 0;
+
 			foreach ($dependencies as $dependency) {
-				if(count($mergers) > $mergersFound) {
-					foreach($mergers as $mimeType => $merger) {
-						if(is_null($merger) && call_user_func_array(array(get_class($dependency->bundle), 'canMerge'), array($mimeType))) {
-							$mergers[$mimeType] = $dependency->bundle;
-							$mergersFound ++;
-						}
-					}
-				}
-				$dependency->compile();
-			}
+                if (count($mergers) > $mergersFound) {
+                    foreach ($mergers as $mimeType => $merger) {
+                        if (is_null($merger) && call_user_func_array(array(get_class($dependency->bundle), 'canMerge'), array($mimeType))) {
+                            $mergers[$mimeType] = $dependency->bundle;
+                            $mergersFound++;
+                        }
+                    }
+                }
+                $depsCacheKey = $dependency->bundle->getHash();
+                if (!isset($depsCache[$depsCacheKey])) {
+                    $depsCache[$depsCacheKey] = true;
+                    $dependency->compile();
+                }
+            }
 			self::build($topLevel, $bundle->debug);
 			// if something has to be merged, do it now
 			for ($i = 0; $i < count($topLevel->result->resources); $i++) {
