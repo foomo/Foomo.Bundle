@@ -133,7 +133,7 @@ abstract class AbstractBundle
 	{
 		$ret = $this->name . '-' . ($this->debug?'debug':'prod');
 		foreach($this->references as $reference) {
-			$ret .= '-reference' . $reference->name;
+			$ret .= '-reference-' . $reference->getFingerPrint();
 		}
 		foreach($this->dependencies as $dependency) {
 			$ret .= '-dependecy-' . $dependency->type . '-' . $dependency->bundle->getFingerPrint();
