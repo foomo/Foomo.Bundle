@@ -20,6 +20,7 @@
 namespace Foomo\Bundle;
 
 use AbstractBundle as Bundle;
+use Foomo\Bundle\Compiler\Result;
 use Foomo\Cache\Proxy;
 use Foomo\Config;
 use Foomo\HTMLDocument;
@@ -133,6 +134,17 @@ class Compiler
 	//------------------------------------------------------------------------------------------------------------------
 	// private implementation
 	//------------------------------------------------------------------------------------------------------------------
+	private static function d($m, $l)
+	{
+		echo str_repeat("	", $l) . $m . PHP_EOL;
+	}
+	private static function dump(AbstractBundle $b, $l = 0)
+	{
+		self::d($b->name, $l);
+		foreach($b->dependencies as $d) {
+			self::dump($d->bundle, $l+1);
+		}
+	}
 
 	/**
 	 * @param AbstractBundle $bundle
@@ -141,8 +153,9 @@ class Compiler
 	 */
 	public static function compile(AbstractBundle $bundle)
 	{
-		static $cache = array();
-        static $depsCache = [];
+		static $cache = [];
+		static $depsCache = [];
+
 		$cacheKey = md5($bundle->getFingerPrint());
 		if(!isset($cache[$cacheKey])) {
 			Timer::start(__METHOD__);
@@ -173,10 +186,14 @@ class Compiler
                 }
                 $depsCacheKey = $dependency->bundle->getHash();
                 if (!isset($depsCache[$depsCacheKey])) {
-                    $depsCache[$depsCacheKey] = true;
                     $dependency->compile();
-                }
-            }
+					$depsCache[$depsCacheKey]  = $dependency->result->resources;
+				} else {
+					$dependency->result = new Result();
+					$dependency->result->resources = $depsCache[$depsCacheKey];
+				}
+			}
+
 			self::build($topLevel, $bundle->debug);
 			// if something has to be merged, do it now
 			for ($i = 0; $i < count($topLevel->result->resources); $i++) {
