@@ -131,21 +131,6 @@ class Compiler
 		return self::compile(call_user_func_array(explode('::', $bundleProvider), $bundleProviderArguments));
 	}
 
-	//------------------------------------------------------------------------------------------------------------------
-	// private implementation
-	//------------------------------------------------------------------------------------------------------------------
-	private static function d($m, $l)
-	{
-		echo str_repeat("	", $l) . $m . PHP_EOL;
-	}
-	private static function dump(AbstractBundle $b, $l = 0)
-	{
-		self::d($b->name, $l);
-		foreach($b->dependencies as $d) {
-			self::dump($d->bundle, $l+1);
-		}
-	}
-
 	/**
 	 * @param AbstractBundle $bundle
 	 *
